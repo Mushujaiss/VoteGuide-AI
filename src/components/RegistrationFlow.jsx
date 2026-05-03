@@ -22,25 +22,51 @@ export default function RegistrationFlow({ onBack }) {
     citizen: false, age: false, resident: false, notDisqualified: false
   });
 
-  // State-specific data
+  // Hierarchical location data
   const stateData = {
-    "Delhi": { districts: ["New Delhi", "South Delhi", "North Delhi"], constituencies: ["New Delhi", "Chandni Chowk", "East Delhi"] },
-    "Maharashtra": { districts: ["Mumbai", "Pune", "Nagpur"], constituencies: ["Mumbai North", "Pune City", "Nagpur Central"] },
-    "Uttar Pradesh": { districts: ["Lucknow", "Kanpur", "Varanasi"], constituencies: ["Lucknow", "Varanasi", "Amethi"] },
-    "Karnataka": { districts: ["Bengaluru", "Mysuru", "Hubballi"], constituencies: ["Bengaluru Central", "Mysore", "Hubli-Dharwad Central"] }
+    "Delhi": {
+      "New Delhi District": ["New Delhi AC", "RK Puram", "Greater Kailash"],
+      "South Delhi District": ["Saket", "Malviya Nagar", "Mehrauli"],
+      "North Delhi District": ["Model Town", "Sadar Bazar", "Chandni Chowk"]
+    },
+    "Maharashtra": {
+      "Mumbai City": ["Colaba", "Malabar Hill", "Mumbadevi"],
+      "Mumbai Suburban": ["Andheri West", "Bandra West", "Borivali"],
+      "Pune District": ["Pune Cantonment", "Shivajinagar", "Kothrud"]
+    },
+    "Uttar Pradesh": {
+      "Lucknow District": ["Lucknow North", "Lucknow East", "Lucknow West"],
+      "Varanasi District": ["Varanasi North", "Varanasi South", "Varanasi Cantt."],
+      "Kanpur Nagar": ["Aryanagar", "Sishamau", "Kidwai Nagar"]
+    },
+    "Karnataka": {
+      "Bengaluru Urban": ["Shanti Nagar", "Shivajinagar", "Malleshwaram"],
+      "Mysuru District": ["Krishnaraja", "Chamaraja", "Narasimharaja"],
+      "Belagavi District": ["Belagavi North", "Belagavi South", "Belagavi Rural"]
+    }
   };
 
   const handleFormChange = (field, value) => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
+      
       if (field === 'state') {
-        const data = stateData[value];
-        if (data) {
-          newData.district = data.districts[0];
-          newData.constituency = data.constituencies[0];
+        const stateInfo = stateData[value];
+        if (stateInfo) {
+          const firstDistrict = Object.keys(stateInfo)[0];
+          newData.district = firstDistrict;
+          newData.constituency = stateInfo[firstDistrict][0];
+          newData.address = `House No. 123, Main Road, ${firstDistrict}, ${value}`;
         } else {
           newData.district = '';
           newData.constituency = '';
+          newData.address = 'House No. 123, Main Road, Area Name';
+        }
+      } else if (field === 'district') {
+        const stateInfo = stateData[prev.state];
+        if (stateInfo && stateInfo[value]) {
+          newData.constituency = stateInfo[value][0];
+          newData.address = `House No. 123, Main Road, ${value}, ${prev.state}`;
         }
       }
       return newData;
@@ -228,7 +254,7 @@ Status:         ACTIVE
                   <label>District</label>
                   {stateData[formData.state] ? (
                     <select value={formData.district} onChange={e => handleFormChange('district', e.target.value)}>
-                      {stateData[formData.state].districts.map(d => <option key={d} value={d}>{d}</option>)}
+                      {Object.keys(stateData[formData.state]).map(d => <option key={d} value={d}>{d}</option>)}
                     </select>
                   ) : (
                     <input type="text" placeholder="District" value={formData.district} onChange={e => handleFormChange('district', e.target.value)} />
@@ -237,9 +263,9 @@ Status:         ACTIVE
               </div>
               <div className="form-row">
                 <label>Constituency</label>
-                {stateData[formData.state] ? (
+                {stateData[formData.state] && stateData[formData.state][formData.district] ? (
                   <select value={formData.constituency} onChange={e => handleFormChange('constituency', e.target.value)}>
-                    {stateData[formData.state].constituencies.map(c => <option key={c} value={c}>{c}</option>)}
+                    {stateData[formData.state][formData.district].map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 ) : (
                   <input type="text" placeholder="Constituency" value={formData.constituency} onChange={e => handleFormChange('constituency', e.target.value)} />
