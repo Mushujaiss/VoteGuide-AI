@@ -1,0 +1,13 @@
+.gcloudignore
+.git
+.gitignore
+node_modules/
+src/
+public/
+.vscode/
+*.md
+
+# Ensure build artifacts and configs are INCLUDED
+!dist/
+!Dockerfile
+!nginx.conf

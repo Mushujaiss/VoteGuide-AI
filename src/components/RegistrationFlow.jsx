@@ -22,8 +22,29 @@ export default function RegistrationFlow({ onBack }) {
     citizen: false, age: false, resident: false, notDisqualified: false
   });
 
+  // State-specific data
+  const stateData = {
+    "Delhi": { districts: ["New Delhi", "South Delhi", "North Delhi"], constituencies: ["New Delhi", "Chandni Chowk", "East Delhi"] },
+    "Maharashtra": { districts: ["Mumbai", "Pune", "Nagpur"], constituencies: ["Mumbai North", "Pune City", "Nagpur Central"] },
+    "Uttar Pradesh": { districts: ["Lucknow", "Kanpur", "Varanasi"], constituencies: ["Lucknow", "Varanasi", "Amethi"] },
+    "Karnataka": { districts: ["Bengaluru", "Mysuru", "Hubballi"], constituencies: ["Bengaluru Central", "Mysore", "Hubli-Dharwad Central"] }
+  };
+
   const handleFormChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      if (field === 'state') {
+        const data = stateData[value];
+        if (data) {
+          newData.district = data.districts[0];
+          newData.constituency = data.constituencies[0];
+        } else {
+          newData.district = '';
+          newData.constituency = '';
+        }
+      }
+      return newData;
+    });
   };
 
   const handleFileUpload = (field, e) => {
@@ -52,6 +73,7 @@ Gender:         ${formData.gender || 'N/A'}
 Address:        ${formData.address || 'Address'}
 State:          ${formData.state || 'State'}
 District:       ${formData.district || 'District'}
+Constituency:   ${formData.constituency || 'N/A'}
 
 EPIC Number:    IND${Math.random().toString(36).substring(2, 9).toUpperCase()}
 Status:         ACTIVE
@@ -198,38 +220,39 @@ Status:         ACTIVE
                   <label>State <span className="req">*</span></label>
                   <select value={formData.state} onChange={e => handleFormChange('state', e.target.value)}>
                     <option value="">Select State</option>
-                    {["Andhra Pradesh","Assam","Bihar","Delhi","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal"].map(s => <option key={s} value={s}>{s}</option>)}
+                    {Object.keys(stateData).map(s => <option key={s} value={s}>{s}</option>)}
+                    {["Andhra Pradesh","Assam","Bihar","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Kerala","Madhya Pradesh","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttarakhand","West Bengal"].filter(s => !stateData[s]).map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
+                <div className="form-row">
+                  <label>District</label>
+                  {stateData[formData.state] ? (
+                    <select value={formData.district} onChange={e => handleFormChange('district', e.target.value)}>
+                      {stateData[formData.state].districts.map(d => <option key={d} value={d}>{d}</option>)}
+                    </select>
+                  ) : (
+                    <input type="text" placeholder="District" value={formData.district} onChange={e => handleFormChange('district', e.target.value)} />
+                  )}
+                </div>
+              </div>
+              <div className="form-row">
+                <label>Constituency</label>
+                {stateData[formData.state] ? (
+                  <select value={formData.constituency} onChange={e => handleFormChange('constituency', e.target.value)}>
+                    {stateData[formData.state].constituencies.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                ) : (
+                  <input type="text" placeholder="Constituency" value={formData.constituency} onChange={e => handleFormChange('constituency', e.target.value)} />
+                )}
+              </div>
+              <div className="form-row-group">
                 <div className="form-row">
                   <label>PIN Code</label>
                   <input type="text" maxLength="6" placeholder="e.g. 110001" value={formData.pincode} onChange={e => handleFormChange('pincode', e.target.value)} />
                 </div>
-              </div>
-              <div className="form-row-group">
                 <div className="form-row">
                   <label>Mobile Number</label>
                   <input type="tel" placeholder="+91 9876543210" value={formData.mobile} onChange={e => handleFormChange('mobile', e.target.value)} />
-                </div>
-                <div className="form-row">
-                  <label>Email ID</label>
-                  <input type="email" placeholder="you@email.com" value={formData.email} onChange={e => handleFormChange('email', e.target.value)} />
-                </div>
-              </div>
-              <div className="form-row-group">
-                <div className="form-row">
-                  <label>ID Proof Type</label>
-                  <select value={formData.idType} onChange={e => handleFormChange('idType', e.target.value)}>
-                    <option value="">Select</option>
-                    <option value="Aadhaar">Aadhaar Card</option>
-                    <option value="PAN">PAN Card</option>
-                    <option value="Passport">Passport</option>
-                    <option value="DrivingLicense">Driving License</option>
-                  </select>
-                </div>
-                <div className="form-row">
-                  <label>ID Number</label>
-                  <input type="text" placeholder="Enter ID number" value={formData.idNumber} onChange={e => handleFormChange('idNumber', e.target.value)} />
                 </div>
               </div>
               {formComplete && <div className="success-msg">✅ Form looks good! Proceed to upload documents.</div>}
@@ -268,33 +291,34 @@ Status:         ACTIVE
           </div>
           <div className="split-form">
             <h3>📄 Upload Your Documents</h3>
-            <p className="form-desc">Click each box to select and upload your file.</p>
-            <div className="upload-grid">
+            <p className="form-desc">Select and upload your files according to the requirements.</p>
+            <div className="upload-stack">
               {[
-                { key: 'photo', label: 'Passport Size Photo', icon: <Camera size={28} />, accept: 'image/*' },
-                { key: 'idProof', label: 'Identity Proof (Aadhaar/PAN)', icon: <FileText size={28} />, accept: 'image/*,.pdf' },
-                { key: 'addressProof', label: 'Address Proof', icon: <FileText size={28} />, accept: 'image/*,.pdf' },
-                { key: 'signature', label: 'Scanned Signature', icon: <PenTool size={28} />, accept: 'image/*' }
+                { key: 'photo', label: 'Passport Size Photo', icon: <Camera size={24} />, accept: 'image/*', guide: '📷 Recent Color Photo' },
+                { key: 'idProof', label: 'Identity Proof', icon: <FileText size={24} />, accept: 'image/*,.pdf', guide: '🪪 Aadhaar / PAN' },
+                { key: 'addressProof', label: 'Address Proof', icon: <FileText size={24} />, accept: 'image/*,.pdf', guide: '🏠 Electricity Bill' },
+                { key: 'signature', label: 'Scanned Signature', icon: <PenTool size={24} />, accept: 'image/*', guide: '✍️ Signed on Paper' }
               ].map(doc => (
-                <label key={doc.key} className={`upload-box ${uploads[doc.key] ? 'uploaded' : ''}`}>
-                  <input type="file" accept={doc.accept} onChange={e => handleFileUpload(doc.key, e)} hidden />
-                  {uploads[doc.key] ? (
-                    <div className="uploaded-preview">
-                      {uploads[doc.key].url && doc.accept.includes('image') ? (
-                        <img src={uploads[doc.key].url} alt={doc.label} className="preview-img" />
-                      ) : (
-                        <CheckCircle2 size={32} color="var(--green)" />
-                      )}
-                      <span className="uploaded-name">{uploads[doc.key].name}</span>
-                    </div>
-                  ) : (
-                    <div className="upload-placeholder">
-                      {doc.icon}
-                      <Upload size={16} />
-                      <span>{doc.label}</span>
-                    </div>
-                  )}
-                </label>
+                <div key={doc.key} className="upload-row-item-simple">
+                  <div className="upload-info-left">
+                    <span className="upload-label-main">{doc.label}</span>
+                    <span className="upload-guide-sub">{doc.guide}</span>
+                  </div>
+                  <label className={`upload-box-small ${uploads[doc.key] ? 'uploaded' : ''}`}>
+                    <input type="file" accept={doc.accept} onChange={e => handleFileUpload(doc.key, e)} hidden />
+                    {uploads[doc.key] ? (
+                      <div className="uploaded-preview-small">
+                        <CheckCircle2 size={18} color="var(--green)" />
+                        <span className="uploaded-name-small">{uploads[doc.key].name}</span>
+                      </div>
+                    ) : (
+                      <div className="upload-placeholder-small">
+                        <Upload size={16} />
+                        <span>Upload File</span>
+                      </div>
+                    )}
+                  </label>
+                </div>
               ))}
             </div>
             {docsComplete && <div className="success-msg">🎉 All documents uploaded! Your application is ready for verification.</div>}
@@ -345,21 +369,8 @@ Status:         ACTIVE
 
       {/* STEP 4: EPIC Issued */}
       {currentStep === 4 && (
-        <div className="step-split">
-          <div className="split-tutorial">
-            <div className="tutorial-badge">📖 Guide</div>
-            <h3>Your EPIC Card</h3>
-            <p>EPIC stands for <strong>Electors Photo Identity Card</strong>. It is the official Voter ID issued by the Election Commission of India.</p>
-            <h4>Key Details:</h4>
-            <ul className="guide-list">
-              <li>It contains your <strong>photo, name, address, and a unique EPIC number</strong>.</li>
-              <li>You can use it as a <strong>valid government ID</strong> anywhere in India.</li>
-              <li>You can also download an <strong>e-EPIC</strong> from the NVSP portal.</li>
-              <li>If lost, you can apply for a <strong>duplicate</strong> using Form 002.</li>
-            </ul>
-          </div>
-          <div className="split-form">
-            <h3>🪪 Your Voter ID Card</h3>
+        <div className="final-step-container fade-in">
+          <div className="epic-card-center-wrapper">
             <div className="epic-card-final">
               <div className="epic-top-bar">
                 <span>ELECTION COMMISSION OF INDIA</span>
@@ -383,10 +394,18 @@ Status:         ACTIVE
                 </div>
               </div>
             </div>
-            <button className="btn-download" onClick={handleDownloadEPIC}>
-              <Download size={18} /> Download e-EPIC Card
+          </div>
+          
+          <div className="final-actions">
+            <button className="btn-innovative-download" onClick={handleDownloadEPIC}>
+              <div className="btn-glow"></div>
+              <Download size={20} /> 
+              <span>Download e-EPIC Card</span>
             </button>
-            <div className="success-msg">🎉 Congratulations! You are now a registered voter in India!</div>
+            <div className="congrats-message">
+              <CheckCircle2 size={24} />
+              <span>Congratulations! You are now a registered voter in India!</span>
+            </div>
           </div>
         </div>
       )}

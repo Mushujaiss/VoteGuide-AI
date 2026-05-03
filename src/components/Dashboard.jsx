@@ -1,24 +1,43 @@
-import { useState } from 'react';
-import { User, MapPin, Calendar, FileText, Mail, Briefcase, Users, Phone, Edit3, Save, Download, Bell, CheckCircle2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { User, MapPin, Calendar, FileText, Mail, Briefcase, Users, Phone, Edit3, Save, Download, Bell, CheckCircle2, Camera, Image as ImageIcon, Smile } from 'lucide-react';
 import './Dashboard.css';
+
+const AVATARS = [
+  '🦁', '🐘', '🐯', '🐼', '🦊', '🐶', '🐱', '🐰', '🦒', '🦓', '🦄', '🐲'
+];
+
+const STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", 
+  "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", 
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", 
+  "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", 
+  "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+];
 
 export default function Dashboard({ userProfile, onLogout }) {
   const [editing, setEditing] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [pickerTab, setPickerTab] = useState('emoji'); // 'emoji' or 'upload'
+  const fileInputRef = useRef(null);
+  
   const [profile, setProfile] = useState({
     name: userProfile?.name || 'Voter Name',
-    email: '',
+    avatar: userProfile?.avatar || '👤',
+    isImageAvatar: userProfile?.avatar?.startsWith('data:image') || false,
+    email: userProfile?.email || '',
     phone: userProfile?.phone || '',
-    occupation: '',
-    fatherName: '',
-    motherName: '',
-    spouseName: '',
-    maritalStatus: '',
-    qualification: '',
-    bloodGroup: '',
+    occupation: userProfile?.occupation || '',
+    fatherName: userProfile?.fatherName || '',
+    motherName: userProfile?.motherName || '',
+    spouseName: userProfile?.spouseName || '',
+    maritalStatus: userProfile?.maritalStatus || '',
+    qualification: userProfile?.qualification || '',
+    bloodGroup: userProfile?.bloodGroup || '',
+    state: userProfile?.state || 'Delhi',
     constituency: userProfile?.constituency || 'New Delhi',
     pollingStation: userProfile?.pollingStation || 'Govt. Primary School, Room No. 5',
     epic: userProfile?.epic || 'IND' + Math.random().toString(36).substring(2, 9).toUpperCase(),
-    address: userProfile?.address || '',
+    address: userProfile?.address || '123, Janpath, New Delhi',
     nextElection: '2026 State Assembly Elections',
     reminderSet: false
   });
@@ -29,13 +48,82 @@ export default function Dashboard({ userProfile, onLogout }) {
 
   const handleSave = () => {
     setEditing(false);
+    setShowAvatarPicker(false);
+    const savedProfiles = JSON.parse(localStorage.getItem('voteguide_userProfile') || '{}');
+    localStorage.setItem('voteguide_userProfile', JSON.stringify({ ...savedProfiles, ...profile }));
+  };
+
+  const selectEmoji = (char) => {
+    setProfile(prev => ({ ...prev, avatar: char, isImageAvatar: false }));
+    setShowAvatarPicker(false);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfile(prev => ({ ...prev, avatar: reader.result, isImageAvatar: true }));
+        setShowAvatarPicker(false);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
     <div className="dashboard fade-in">
       <div className="dash-header">
         <div className="dash-welcome">
-          <img src="/images/avatar.png" alt="Profile" className="dash-avatar" />
+          <div className="avatar-container" onClick={() => editing && setShowAvatarPicker(!showAvatarPicker)}>
+            {profile.isImageAvatar ? (
+              <img src={profile.avatar} alt="Avatar" className="dash-avatar-img" />
+            ) : (
+              <div className="dash-avatar-char">{profile.avatar}</div>
+            )}
+            
+            {editing && <div className="avatar-edit-overlay"><Camera size={16} /></div>}
+            
+            {showAvatarPicker && editing && (
+              <div className="avatar-picker glass-panel" onClick={e => e.stopPropagation()}>
+                <div className="picker-tabs">
+                  <button 
+                    className={`picker-tab ${pickerTab === 'emoji' ? 'active' : ''}`}
+                    onClick={() => setPickerTab('emoji')}
+                  >
+                    <Smile size={16} /> Emojis
+                  </button>
+                  <button 
+                    className={`picker-tab ${pickerTab === 'upload' ? 'active' : ''}`}
+                    onClick={() => setPickerTab('upload')}
+                  >
+                    <ImageIcon size={16} /> Photo
+                  </button>
+                </div>
+
+                {pickerTab === 'emoji' ? (
+                  <div className="emoji-grid">
+                    {AVATARS.map(a => (
+                      <button key={a} className="avatar-option" onClick={() => selectEmoji(a)}>{a}</button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="upload-avatar-zone">
+                    <p>Upload your real photo</p>
+                    <button className="btn-upload-avatar" onClick={() => fileInputRef.current.click()}>
+                      Select Image
+                    </button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleFileChange} 
+                      accept="image/*" 
+                      style={{ display: 'none' }} 
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           <div>
             <h2>Welcome, {profile.name}!</h2>
             <p className="dash-subtitle">Voter Dashboard • <span className="active-badge">Active Voter</span></p>
@@ -58,7 +146,7 @@ export default function Dashboard({ userProfile, onLogout }) {
             <MapPin size={20} color="var(--saffron)" />
             <div>
               <span className="q-label">Constituency</span>
-              <span className="q-value">{profile.constituency}</span>
+              <span className="q-value">{profile.constituency}, {profile.state}</span>
             </div>
           </div>
           <div className="q-card">
@@ -187,12 +275,20 @@ export default function Dashboard({ userProfile, onLogout }) {
               {editing ? <textarea rows="2" placeholder="Enter full address" value={profile.address} onChange={e => handleChange('address', e.target.value)} /> : <p>{profile.address || '—'}</p>}
             </div>
             <div className="info-field">
+              <label>State</label>
+              {editing ? (
+                <select value={profile.state} onChange={e => handleChange('state', e.target.value)}>
+                  {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              ) : <p>{profile.state}</p>}
+            </div>
+            <div className="info-field">
               <label>Constituency</label>
-              <p>{profile.constituency}</p>
+              {editing ? <input type="text" value={profile.constituency} onChange={e => handleChange('constituency', e.target.value)} /> : <p>{profile.constituency}</p>}
             </div>
             <div className="info-field">
               <label>Polling Station</label>
-              <p>{profile.pollingStation}</p>
+              {editing ? <input type="text" value={profile.pollingStation} onChange={e => handleChange('pollingStation', e.target.value)} /> : <p>{profile.pollingStation}</p>}
             </div>
           </div>
         </div>

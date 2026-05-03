@@ -25,7 +25,7 @@ const generateMockUser = (epic) => {
     constituency: constituency,
     pollingStation: `Govt. Primary School, Room No. ${randomInt(1, 10)}`,
     status: "Active (Registered)",
-    avatar: "/images/avatar.png"
+    avatar: "🦁"
   };
 };
 

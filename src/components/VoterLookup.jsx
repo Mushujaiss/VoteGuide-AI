@@ -50,7 +50,7 @@ export default function VoterLookup() {
         {result && (
           <div className="voter-card">
             <div className="voter-card-header">
-              <img src={result.avatar} alt="Voter Avatar" className="voter-avatar" />
+              <div className="voter-avatar-char">{result.avatar}</div>
               <div>
                 <h4><CheckCircle2 color="var(--green)" size={20} /> Voter Verified</h4>
                 <p className="epic-badge">{result.epic}</p>

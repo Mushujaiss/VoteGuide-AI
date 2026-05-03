@@ -13,9 +13,17 @@ import './App.css';
 function App() {
   const [view, setView] = useState('home');
   const [showLogin, setShowLogin] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return localStorage.getItem('voteguide_isLoggedIn') === 'true';
+  });
+  const [userProfile, setUserProfile] = useState(() => {
+    const saved = localStorage.getItem('voteguide_userProfile');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [showTutorial, setShowTutorial] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('voteguide_theme') || 'default';
+  });
 
   useEffect(() => {
     const hasSeenTutorial = localStorage.getItem('voteguide_tutorial_seen');
@@ -23,6 +31,11 @@ function App() {
       setShowTutorial(true);
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('voteguide_theme', theme);
+  }, [theme]);
 
   const closeTutorial = () => {
     setShowTutorial(false);
@@ -32,6 +45,8 @@ function App() {
   const handleLoginSuccess = (profile) => {
     setIsLoggedIn(true);
     setUserProfile(profile);
+    localStorage.setItem('voteguide_isLoggedIn', 'true');
+    localStorage.setItem('voteguide_userProfile', JSON.stringify(profile));
     setShowLogin(false);
     setView('dashboard');
   };
@@ -39,6 +54,8 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserProfile(null);
+    localStorage.removeItem('voteguide_isLoggedIn');
+    localStorage.removeItem('voteguide_userProfile');
     setView('home');
   };
 
@@ -47,12 +64,15 @@ function App() {
       <div className="bg-elements">
         <div className="glow glow-saffron"></div>
         <div className="glow glow-green"></div>
+        <div className="glow glow-blue"></div>
       </div>
 
       <Navbar 
         onLoginClick={() => setShowLogin(true)} 
         isLoggedIn={isLoggedIn}
         onDashboardClick={() => setView('dashboard')}
+        theme={theme}
+        setTheme={setTheme}
       />
 
       <main className="container">
