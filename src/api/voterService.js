@@ -2,30 +2,43 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-const firstNames = ["Aarav", "Vivaan", "Aditya", "Vihaan", "Arjun", "Sai", "Ayaan", "Krishna", "Ishaan", "Shaurya", "Diya", "Isha", "Sanya", "Kriti", "Neha", "Priya", "Ananya", "Aarohi", "Riya"];
+const maleFirstNames = ["Aarav", "Vivaan", "Aditya", "Vihaan", "Arjun", "Sai", "Ayaan", "Krishna", "Ishaan", "Shaurya"];
+const femaleFirstNames = ["Diya", "Isha", "Sanya", "Kriti", "Neha", "Priya", "Ananya", "Aarohi", "Riya", "Myra"];
 const lastNames = ["Sharma", "Patel", "Singh", "Kumar", "Gupta", "Das", "Reddy", "Rao", "Jain", "Bose", "Verma", "Yadav", "Iyer", "Chauhan"];
-const constituencies = ["New Delhi", "Mumbai South", "Bangalore Central", "Chennai North", "Kolkata Dakshin", "Ahmedabad West", "Pune", "Hyderabad", "Jaipur", "Lucknow"];
-const states = ["Delhi", "Maharashtra", "Karnataka", "Tamil Nadu", "West Bengal", "Gujarat", "Rajasthan", "Uttar Pradesh", "Telangana"];
+
+const locationData = [
+  { state: "Delhi", constituency: "New Delhi", district: "New Delhi District" },
+  { state: "Maharashtra", constituency: "Mumbai South", district: "Mumbai City" },
+  { state: "Karnataka", constituency: "Bangalore Central", district: "Bengaluru Urban" },
+  { state: "Tamil Nadu", constituency: "Chennai North", district: "Chennai" },
+  { state: "West Bengal", constituency: "Kolkata Dakshin", district: "Kolkata" },
+  { state: "Uttar Pradesh", constituency: "Lucknow North", district: "Lucknow" },
+  { state: "Gujarat", constituency: "Ahmedabad West", district: "Ahmedabad" },
+  { state: "Telangana", constituency: "Hyderabad Central", district: "Hyderabad" }
+];
 
 const generateMockUser = (epic) => {
-  const fName = firstNames[randomInt(0, firstNames.length - 1)];
+  const gender = randomInt(0, 1) === 0 ? "Male" : "Female";
+  const nameList = gender === "Male" ? maleFirstNames : femaleFirstNames;
+  const fName = nameList[randomInt(0, nameList.length - 1)];
   const lName = lastNames[randomInt(0, lastNames.length - 1)];
+  
+  const loc = locationData[randomInt(0, locationData.length - 1)];
   const age = randomInt(18, 85);
   const houseNo = randomInt(1, 999);
-  const street = `Sector ${randomInt(1, 50)}`;
-  const constituency = constituencies[randomInt(0, constituencies.length - 1)];
-  const state = states[randomInt(0, states.length - 1)];
+  const street = `Sector ${randomInt(1, 50)}, ${loc.district}`;
   
   return {
     epic: epic.toUpperCase(),
     name: `${fName} ${lName}`,
     age: age,
-    gender: randomInt(0, 1) === 0 ? "Male" : "Female",
-    address: `H.No ${houseNo}, ${street}, ${constituency}, ${state}`,
-    constituency: constituency,
+    gender: gender,
+    address: `H.No ${houseNo}, ${street}, ${loc.state}`,
+    constituency: loc.constituency,
+    state: loc.state,
     pollingStation: `Govt. Primary School, Room No. ${randomInt(1, 10)}`,
     status: "Active (Registered)",
-    avatar: "🦁"
+    avatar: gender === "Male" ? "👨" : "👩"
   };
 };
 
