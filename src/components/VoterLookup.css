@@ -1,0 +1,159 @@
+.api-lookup-section {
+  padding: 3rem;
+  border-radius: 16px;
+  margin-top: 4rem;
+  text-align: center;
+}
+
+.api-lookup-section h2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--white);
+}
+
+.subtitle {
+  color: var(--text-muted);
+}
+
+.lookup-container {
+  display: flex;
+  max-width: 500px;
+  margin: 2rem auto 0;
+  gap: 1rem;
+}
+
+.lookup-container input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--chakra-blue);
+  background: rgba(0, 0, 0, 0.2);
+  color: white;
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.lookup-container input:focus {
+  border-color: var(--saffron);
+}
+
+.btn-search {
+  background: var(--chakra-blue);
+  color: white;
+  border: none;
+  padding: 0 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+
+.btn-search:disabled {
+  background: #4a4a6a;
+  cursor: not-allowed;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.lookup-result {
+  margin-top: 2rem;
+  min-height: 100px;
+}
+
+/* Enhanced Voter Card */
+.voter-card {
+  background: rgba(19, 136, 8, 0.08);
+  border: 1px solid var(--green);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: left;
+  max-width: 500px;
+  margin: 0 auto;
+  animation: fadeIn 0.4s ease;
+}
+
+.voter-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.voter-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid var(--green);
+}
+
+.voter-card-header h4 {
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.epic-badge {
+  background: rgba(0, 0, 128, 0.3);
+  color: #a5b4fc;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  display: inline-block;
+}
+
+.voter-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.voter-details-grid p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.voter-details-grid strong {
+  color: var(--white);
+}
+
+.status-badge {
+  margin-top: 1.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(19, 136, 8, 0.2);
+  color: var(--green);
+  border-radius: 20px;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.error-card {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
