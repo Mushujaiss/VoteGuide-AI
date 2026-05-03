@@ -38,7 +38,7 @@ const generateMockUser = (epic) => {
     state: loc.state,
     pollingStation: `Govt. Primary School, Room No. ${randomInt(1, 10)}`,
     status: "Active (Registered)",
-    avatar: gender === "Male" ? "👨" : "👩"
+    avatar: gender === "Male" ? "/images/voter_male.png" : "/images/voter_female.png"
   };
 };
 
